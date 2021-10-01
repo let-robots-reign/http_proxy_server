@@ -1,0 +1,11 @@
+{
+  "name": "http_proxy_server",
+  "version": "1.0.0",
+  "description": "TP Security HW1",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Alexey Zotov",
+  "license": "ISC"
+}
