@@ -1,6 +1,6 @@
 import * as http from 'http';
 
-export const requestHandler = (client_req, client_res) => {
+export const httpRequestHandler = (client_req, client_res) => {
     /**
      * - считать хост и порт из первой строчки
      * - заменить путь на относительный

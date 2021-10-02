@@ -1,10 +1,10 @@
 'use strict';
 
-const http = require('http');
+import * as http from 'http';
 
-import { config } from './config/config';
-import { httpRequestHandler } from './handlers/httpRequestHandler';
-import { httpsRequestHandler } from './handlers/httpsRequestHandler';
+import { config } from './config/config.js';
+import { httpRequestHandler } from './handlers/httpRequestHandler.js';
+import { httpsRequestHandler } from './handlers/httpsRequestHandler.js';
 
 const server = http.createServer(httpRequestHandler);
 

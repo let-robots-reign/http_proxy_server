@@ -1,7 +1,6 @@
 import * as net from 'net';
 import * as url from 'url';
 
-
 export const httpsRequestHandler = (req, clientSocket, head) => {
     // listening for HTTP/1.1 CONNECT
     const { port, host } = url.parse(`//${req.url}`, false, true);
