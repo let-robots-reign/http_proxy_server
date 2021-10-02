@@ -9,6 +9,7 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 8000
-EXPOSE 8080
+# run gen_ca.sh
+
+EXPOSE 8000 8080
 CMD [ "node", "index.js" ]
