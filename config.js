@@ -1,7 +1,6 @@
-export const config = {
+const config = {
     port: 8080,
-    httpsPort: 443,
-    httpPort: 80,
+    portHTTPS: 443,
     portStatic: 8000,
     startMarkup: `
     <!DOCTYPE html>
@@ -21,3 +20,5 @@ export const config = {
         </body>
     </html>`,
 }
+
+module.exports = config;

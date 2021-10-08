@@ -9,12 +9,11 @@
   "author": "Alexey Zotov",
   "license": "ISC",
   "dependencies": {
-    "arraybuffer-to-string": "^1.0.2",
     "express": "^4.17.1",
-    "http": "0.0.1-security",
-    "node-fetch": "^2.6.1",
-    "shelljs": "^0.8.4",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.6",
+    "shelljs": "^0.8.3",
+    "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2"
-  },
-  "type": "module"
+  }
 }

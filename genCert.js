@@ -1,58 +1,47 @@
-import { readFileSync, writeFile } from "fs";
-import tls from "tls";
-import { spawn } from "child_process";
+const shelljs = require("shelljs");
+const path = require("path");
+const fs = require("fs");
+const tls = require("tls");
 
-const certs = {};
-const key = readFileSync('cert.key');
+const certsPath = 'certs';
 
-const createSecureContext = (cert) => {
-    return tls.createSecureContext({
-        key,
-        cert
-    });
-}
+const getCertScript = ({country, city, organization, host}) => `
+      cd ${certsPath};
+      openssl genrsa -out ${host}.key 2048;
+      openssl req -new -sha256 -key ${host}.key -subj '/C=${country}/ST=${city}/O=${organization}, Inc./CN=${host}' -out ${host}.csr;
+      openssl req -in ${host}.csr -noout -text;
+      openssl x509 -req -in ${host}.csr -CA ../ca.crt -CAkey ../ca.key -CAcreateserial -out ${host}.crt -days 500 -sha256;
+      openssl x509 -in ${host}.crt -text -noout;
+`;
 
-const generateCert = (domain, callback) => {
-    console.log(`gen cert ${domain}`);
-    let gen_cert = spawn('./gen_cert.sh', [domain, Math.floor(Math.random() * 10**12)]);
-
-    gen_cert.stdout.once('data', (data) => {
-        certs[domain] = data;
-        let ctx = createSecureContext(data);
-        callback(null, ctx);
-        writeFile(`certs/${domain}.crt`, data, (err) => {
-            if (err) {
-                console.log(err.message)
-            }
-        });
-    });
-
-    gen_cert.stderr.on('data', (data) => {
-        console.log(`cert gen stderr: ${data}`);
-    });
-}
-
-export const options = {
-    key: readFileSync('./ca.key'),
-    cert: readFileSync('./ca.crt'),
-    SNICallback: function (domain, callback) {
-        console.log(domain, callback);
-        if (certs[domain]) {
-            if (callback) {
-                callback(null, certs[domain]);
-            } else {
-                return certs[domain];
-            }
-        } else {
-            // TODO: generate cert
-            throw new Error('No keys/certificates for domain requested');
-        }
-        // if ((domain in certs)) {
-        //     generateCert(domain, callback);
-        //     return;
-        // }
-        // console.log(`using existing cert ${domain}`);
-        // let ctx = createSecureContext(certs[domain]);
-        // callback(null, ctx);
-    }
+const generate = (host) => {
+    shelljs.exec(getCertScript({
+        country: 'RU',
+        city: 'Moscow',
+        organization: 'Technopark',
+        host
+    }));
 };
+
+const generateCertificate = (host) => {
+    const certPath = path.resolve(certsPath, `${host}.crt`);
+    const keyPath = path.resolve(certsPath, `${host}.key`);
+
+    if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
+        generate(host);
+    }
+
+    return {
+        cert: fs.readFileSync(certPath),
+        key: fs.readFileSync(keyPath),
+    };
+};
+
+const SNICallback = (host, callback) => {
+    const secureOptions = generateCertificate(host);
+    const context = tls.createSecureContext(secureOptions);
+
+    callback(null, context);
+};
+
+module.exports = SNICallback;

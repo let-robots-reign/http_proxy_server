@@ -1,22 +1,19 @@
-import https from 'https';
-import http from 'http';
-import { config } from './config/config.js';
+const http = require('http');
+const https = require('https');
 
-export const requestHandler = (req, res, isSecure) => {
+const requestHandler = async (req, res, isSecure, db) => {
     const options = {
-        port: isSecure ? config.httpsPort : config.httpPort,
+        port: isSecure ? 443 : 80,
         host: req.headers.host,
         method: req.method,
         path: req.url,
         headers: req.headers
     };
 
-    // TODO: сохранить запрос
-
-    console.log(isSecure);
+    await db.saveRequest(options);
 
     const proxyReq = isSecure ? https.request(options) : http.request(options);
-    proxyReq.addListener('response',  (proxyRes) => {
+    proxyReq.addListener('response', (proxyRes) => {
         proxyRes.addListener('data', (chunk) => res.write(chunk, 'binary'));
         proxyRes.addListener('end', () => res.end());
 
@@ -26,3 +23,5 @@ export const requestHandler = (req, res, isSecure) => {
     req.addListener('data', (chunk) => proxyReq.write(chunk, 'binary'));
     req.addListener('end', () => proxyReq.end());
 };
+
+module.exports = requestHandler;
