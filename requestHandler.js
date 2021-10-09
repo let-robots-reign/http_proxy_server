@@ -2,14 +2,19 @@ const http = require('http');
 const https = require('https');
 
 const requestHandler = async (req, res, isSecure, db) => {
+    console.log(req);
+    // TODO: Отдельно парсить заголовки и cookie
+    // TODO: Отдельно записать get и post параметры
     const options = {
         port: isSecure ? 443 : 80,
         host: req.headers.host,
         method: req.method,
         path: req.url,
-        headers: req.headers
+        headers: req.headers,
+        body: req.body
     };
 
+    // TODO: Сохранять в БД и ответ
     await db.saveRequest(options);
 
     const proxyReq = isSecure ? https.request(options) : http.request(options);
