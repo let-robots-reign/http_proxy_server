@@ -49,6 +49,8 @@ const createAPIApp = (db) => {
             response = `
                 <div>${request.host}</div>
                 <div>path: ${request.path}</div>
+                <div>Запрос:</div>
+                <div><pre>${JSON.stringify(request, null, 4)}</pre></div>
                 <hr>
             `;
         } else {
@@ -62,7 +64,7 @@ const createAPIApp = (db) => {
         const request = JSON.parse((await db.getRequest(req.params.id)).request);
         if (request) {
             console.log('Repeat HTTP request to', request.path);
-            const body = await requestModule(request.path, request);
+            const resp = await requestModule({...request, resolveWithFullResponse: true});
 
             response = `
                 <div>${request.host} повторно!</div>
@@ -70,7 +72,7 @@ const createAPIApp = (db) => {
                     <div>path: ${request.path}</div>
                     <div>Ответ:</div>
                 </div>
-                <div>${body}</div>
+                <div><pre>${JSON.stringify(resp, null, 4)}</pre></div>
                 <hr>
             `;
         } else {
@@ -91,8 +93,8 @@ const createAPIApp = (db) => {
 
         let response = '<div>Сканирование запроса</div>';
         console.log('Scanning HTTP request to', request.path);
-        if (request.body === '' || request.body.match(/<\?xml/) === null) {
-            response += '<div>No XXE in request</div>';
+        if (!request.body || request.body.match(/<\?xml/) === null) {
+            response += '<div>Нет угрозы XXE в данном запросе</div>';
         } else {
             let str = request.body;
             let arr = str.split('<?xml');
@@ -110,9 +112,9 @@ const createAPIApp = (db) => {
             });
             const data = await res.text();
             if (data.match(/root:/) === null) {
-                response += '<div>No XXE in request</div>';
+                response += '<div>Нет угрозы XXE в данном запросе</div>';
             } else {
-                response += '<div>This request has XXE!</div>';
+                response += '<div>Запрос подвержен XXE!</div>';
             }
         }
         res.send(config.startMarkup + response + config.endMarkup);

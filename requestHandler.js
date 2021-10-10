@@ -1,9 +1,16 @@
 const http = require('http');
 const https = require('https');
 
+const getCookies = (request) => {
+    const cookies = {};
+    request.headers?.cookie?.split(';').forEach((cookie) => {
+        const parts = cookie.match(/(.*?)=(.*)$/);
+        cookies[parts[1].trim()] = (parts[2] || '').trim();
+    });
+    return cookies;
+};
+
 const requestHandler = async (req, res, isSecure, db) => {
-    console.log(req);
-    // TODO: Отдельно парсить заголовки и cookie
     // TODO: Отдельно записать get и post параметры
     const options = {
         port: isSecure ? 443 : 80,
@@ -11,10 +18,12 @@ const requestHandler = async (req, res, isSecure, db) => {
         method: req.method,
         path: req.url,
         headers: req.headers,
-        body: req.body
+        body: req.body,
+        cookies: getCookies(req),
+        get_params: req.query,
+        uri: req.url
     };
 
-    // TODO: Сохранять в БД и ответ
     await db.saveRequest(options);
 
     const proxyReq = isSecure ? https.request(options) : http.request(options);
