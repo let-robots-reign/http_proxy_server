@@ -11,7 +11,6 @@ const getCookies = (request) => {
 };
 
 const requestHandler = async (req, res, isSecure, db) => {
-    // TODO: Отдельно записать get и post параметры
     const options = {
         port: isSecure ? 443 : 80,
         host: req.headers.host,

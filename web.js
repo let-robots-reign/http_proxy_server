@@ -1,6 +1,7 @@
 const express = require('express');
 const config = require("./config");
 const requestModule = require("request-promise");
+const _ = require('underscore');
 
 const createAPIApp = (db) => {
     const app = express();
@@ -69,10 +70,10 @@ const createAPIApp = (db) => {
             response = `
                 <div>${request.host} повторно!</div>
                 <div>
-                    <div>path: ${request.path}</div>
+                    <div>Путь: ${request.path}</div>
                     <div>Ответ:</div>
                 </div>
-                <div><pre>${JSON.stringify(resp, null, 4)}</pre></div>
+                <div><pre>${_.escape(JSON.stringify(resp, null, 4))}</pre></div>
                 <hr>
             `;
         } else {
@@ -91,7 +92,7 @@ const createAPIApp = (db) => {
             return;
         }
 
-        let response = '<div>Сканирование запроса</div>';
+        let response = `<div>Сканирование запроса к ${request.path}</div>`;
         console.log('Scanning HTTP request to', request.path);
         if (!request.body || request.body.match(/<\?xml/) === null) {
             response += '<div>Нет угрозы XXE в данном запросе</div>';
